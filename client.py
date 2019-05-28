@@ -101,33 +101,34 @@ def video():
         sliding = 0                                                                 #彈幕滑動
 
         while 1:                                                                    #讀取對方的視訊
-                     
-            data = s.recv(100000)
+            time.sleep(0.06)         
+            data = s.recv(1000000000) #再加0 compile會過不了
+            data2 = s.recv(10000000)
+            data += data2
                 
             try:                                                                    #將接收的RGB陣列寫到jpg檔中再打開
                     
-                with open('save.jpg','wb') as f:
+                with open('save.jpeg','wb') as f:
                     f.write(data)
 
                 try:
                         
                     global frame
-                    frame = cv2.imread('save.jpg') 
+                    frame = cv2.imread('save.jpeg') 
                     cv2.imshow('Server', frame)
-
-                    if cv2.waitKey(1000) == ord('q'):
+                    if cv2.waitKey(100) == ord('q'):
                         cv2.destroyAllWindows()
                         break
                             
                 except:
-                    data = s.recv(100000)
+                    data = s.recv(100000000)
                     print(":(")
                     
             except:
                 print('except')
                 pass
                     
-            s.sendall(str.encode('ack'))
+            #s.sendall(str.encode('ack'))
         
 
     recscreen()

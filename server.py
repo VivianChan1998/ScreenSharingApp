@@ -3,7 +3,7 @@ import cv2
 import time
 from threading import Thread
 import pickle
-
+import wx
 import numpy as np
 # from PIL import ImageGrab     # This does not support linux
 import pyscreenshot as ImageGrab
@@ -90,18 +90,31 @@ def sndvideo():                                                                 
 # This is for screen
 def video():
     def sndscreen():
-         
+        app = wx.App()
+        screen = wx.ScreenDC()
+        size = screen.GetSize()
         while(True):
-            screen = ImageGrab.grab(bbox=(0, 0, 1920, 1200)).resize((640, 400))
-            screen = np.array(screen)
+            #time.sleep(0.01)
+            bmp = wx.Bitmap(size[0], size[1])
+            mem = wx.MemoryDC(bmp)
+            mem.Blit(0, 0, size[0], size[1], screen, 0, 0)
+            del mem
+            bmp.SaveFile('screen.jpeg', wx.BITMAP_TYPE_JPEG)
+
+            '''
+            舊方法
+            screen = ImageGrab.grab(bbox=(0, 0, 1920, 1200)).resize((1280,800))
+            screen = np.array(ImageGrab.grab(bbox=(0, 0, 1920, 1200)).resize((1280,800)))
             screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
-            cv2.imwrite('screen.jpg', screen, [cv2.IMWRITE_JPEG_QUALITY, 3])
+            cv2.imwrite('screen.jpg', screen, [cv2.IMWRITE_JPEG_QUALITY, 2])
+            '''
                     
             try:
-                with open('screen.jpg','rb') as f:
+                
+                with open('screen.jpeg','rb') as f:
                     client.sendall(f.read())
-            
-                ack = client.recv(128)
+                #ack = client.recv(128) #先取消ack 為了用兩次recv去防止「傳一次沒有傳到完整圖片但是被ack卡住了」這件事
+                #可以再看看能不能加回來，雖然沒有應該不會怎樣吧（？
                 
             except:
                 pass
