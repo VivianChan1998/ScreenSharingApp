@@ -101,7 +101,7 @@ def video():
         sliding = 0                                                                 #彈幕滑動
 
         while 1:                                                                    #讀取對方的視訊
-            time.sleep(0.06)         
+            #time.sleep(0.0001)         
             data = s.recv(1000000000) #再加0 compile會過不了
             data2 = s.recv(10000000)
             data += data2
@@ -114,7 +114,7 @@ def video():
                 try:
                         
                     global frame
-                    frame = cv2.imread('save.jpeg') 
+                    frame = cv2.imread('save.jpeg')
                     cv2.imshow('Server', frame)
                     if cv2.waitKey(100) == ord('q'):
                         cv2.destroyAllWindows()
