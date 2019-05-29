@@ -3,7 +3,7 @@ import cv2
 import time
 from threading import Thread
 import pickle
-import wx
+
 import numpy as np
 # from PIL import ImageGrab     # This does not support linux
 import pyscreenshot as ImageGrab
@@ -21,7 +21,7 @@ def receive():
         response = client.recv(1024)
         print(response.decode('utf-8'))
 
-
+'''
 # This is for camera
 a = ''
 def sndvideo():                                                                         #傳
@@ -85,38 +85,96 @@ def sndvideo():                                                                 
                     
         except:
             pass
+'''
+
+def recvideo():
+
+    global lock
+    kernel = np.array([[0,-1,0], [-1,5,-1], [0,-1,0]])
+    i=0
+    minute=0
+    sec=0
+    clock = time.time()                                                         #計時
+    sliding = 0                                                                 #彈幕滑動
+
+    while 1:                                                                    #讀取對方的視訊
+                     
+        data = client.recv(3000000)
+                
+        try:                                                                    #將接收的RGB陣列寫到jpg檔中再打開
+                    
+            with open('save.jpg','wb') as f:
+                f.write(data)
+
+            try:
+                        
+                global frame
+                frame = cv2.imread('save.jpg')
+
+                #frame = cv2.medianBlur(frame, 5)  
+                #frame = cv2.filter2D(frame, -1, kernel)
+                
+                counter = int (time.time()-clock)
+                minute = int (counter/60)
+                sec = int (counter%60)
+
+                for e in DANMU:
+        
+                    e[1] += 10
+                    cv2.putText(frame, e[0], (550-e[1],e[2]), cv2.FONT_HERSHEY_SIMPLEX,2,(34,195,46),1, cv2.LINE_AA)
+
+                    if e[1] == 550:
+                        DANMU.pop(0)
+
+                cv2.putText(frame, str(minute) + ':' + str(sec), (0,86), cv2.FONT_HERSHEY_SIMPLEX,2,(34,195,46),1, cv2.LINE_AA)
+                cv2.putText(frame, str(i), (0,40), cv2.FONT_HERSHEY_SIMPLEX,2,(34,195,46),1, cv2.LINE_AA)
+                
+                cv2.imshow('Server', frame)                                          #顯示畫面
+
+                i+=1
+                
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+                            
+            except:
+                             
+                data = client.recv(6000000)                              #傳送中出現錯誤,清空buffer
+                print(":(")
+                        
+        except:
+            pass
+                    
+        client.sendall(str.encode('ack'))
 
 
 # This is for screen
 def video():
     def sndscreen():
-        app = wx.App()
-        screen = wx.ScreenDC()
-        size = screen.GetSize()
-        while(True):
-            #time.sleep(0.01)
-            
-            bmp = wx.Bitmap(size[0], size[1])
-            mem = wx.MemoryDC(bmp)
-            mem.Blit(0, 0, size[0], size[1], screen, 0, 0)
-            del mem
-            bmp.SaveFile('screen.jpeg', wx.BITMAP_TYPE_JPEG)
+        resolution = 20
+        #estimate = 0.1
+        #dev = 0
+        #add = 0
+        #sub = 0
+        #count = 0
 
-            '''
-            #舊方法
-            screen = ImageGrab.grab(bbox=(0, 0, 1920, 1200)).resize((1280,800))
-            screen = np.array(ImageGrab.grab(bbox=(0, 0, 1920, 1200)).resize((1280,800)))
-            screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
-            cv2.imwrite('screen.jpg', screen, [cv2.IMWRITE_JPEG_QUALITY, 2])
-            '''
+        while(True):
+            screen = ImageGrab.grab(bbox=(480, 300, 1440, 900))#.resize((960, 600))
+            screen = cv2.cvtColor(np.array(screen), cv2.COLOR_BGR2RGB)
+            cv2.imwrite('screen.jpg', screen, [cv2.IMWRITE_JPEG_QUALITY, resolution])
                     
             try:
-                
-                with open('screen.jpeg','rb') as f:
+                start = time.time()
+                with open('screen.jpg','rb') as f:
                     client.sendall(f.read())
-                #ack = client.recv(128) #先取消ack 為了用兩次recv去防止「傳一次沒有傳到完整圖片但是被ack卡住了」這件事
-                #可以再看看能不能加回來，雖然沒有應該不會怎樣吧（？
-                
+            
+                #ack = client.recv(128)
+                sample = time.time()- start
+
+                if sample > 6e-5:
+                    resolution = 10
+                else:
+                    resolution = 20
+
             except:
                 pass
         
@@ -125,9 +183,9 @@ def video():
 
 
 if __name__ == '__main__':
-    HOST, PORT = "", 61676
+    # HOST, PORT = "127.0.0.1", 61677
     # HOST, PORT = "140.112.226.236", 61677
-    # HOST, PORT = "163.13.137.71", 61677
+    HOST, PORT = "163.13.137.71", 61677
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     s.bind((HOST, PORT))
     print('waiting...')
@@ -137,7 +195,9 @@ if __name__ == '__main__':
     print('%s connected' % str(address))
 
     # 1 camera
+    # press "q" to close the screen
     # sndvideo()
+    # recvideo()
 
     # 2 screen
     # press "q" to close the screen
