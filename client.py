@@ -105,7 +105,7 @@ def video():
             data  = s.recv(1000000000) #再加0 compile會過不了
             data2 = s.recv(1000000000)
             data3 = s.recv(1000000000)
-            data34 = s.recv(1000000000)
+            data4 = s.recv(1000000000)
             data = data + data2 + data3 + data4
                 
             try:                                                                    #將接收的RGB陣列寫到jpg檔中再打開
