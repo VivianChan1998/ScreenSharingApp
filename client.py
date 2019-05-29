@@ -102,9 +102,10 @@ def video():
 
         while 1:                                                                    #讀取對方的視訊
             #time.sleep(0.0001)         
-            data = s.recv(1000000000) #再加0 compile會過不了
-            data2 = s.recv(10000000)
-            data += data2
+            data  = s.recv(1000000000) #再加0 compile會過不了
+            data2 = s.recv(1000000000)
+            data3 = s.recv(1000000000)
+            data = data + data2 + data3
                 
             try:                                                                    #將接收的RGB陣列寫到jpg檔中再打開
                     
@@ -135,7 +136,7 @@ def video():
 
 
 if __name__ == "__main__" :
-    HOST, PORT = "127.0.0.1", 61677
+    HOST, PORT = "118.233.68.7", 61676
     # HOST, PORT = "140.112.226.236", 61677
     # HOST, PORT = "163.13.137.71", 61677
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

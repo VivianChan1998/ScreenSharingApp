@@ -95,6 +95,7 @@ def video():
         size = screen.GetSize()
         while(True):
             #time.sleep(0.01)
+            
             bmp = wx.Bitmap(size[0], size[1])
             mem = wx.MemoryDC(bmp)
             mem.Blit(0, 0, size[0], size[1], screen, 0, 0)
@@ -102,7 +103,7 @@ def video():
             bmp.SaveFile('screen.jpeg', wx.BITMAP_TYPE_JPEG)
 
             '''
-            舊方法
+            #舊方法
             screen = ImageGrab.grab(bbox=(0, 0, 1920, 1200)).resize((1280,800))
             screen = np.array(ImageGrab.grab(bbox=(0, 0, 1920, 1200)).resize((1280,800)))
             screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
@@ -124,7 +125,7 @@ def video():
 
 
 if __name__ == '__main__':
-    HOST, PORT = "127.0.0.1", 61677
+    HOST, PORT = "", 61676
     # HOST, PORT = "140.112.226.236", 61677
     # HOST, PORT = "163.13.137.71", 61677
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
