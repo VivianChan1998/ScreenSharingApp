@@ -8,7 +8,13 @@ import numpy as np
 # from PIL import ImageGrab     # This does not support linux
 import pyscreenshot as ImageGrab
 
+from multiprocessing import Process, Manager, Value
+from ctypes import c_char_p
+import pygame
+from pygame.locals import *
+import os
 
+'''
 # for sending text on terminal
 def send():
     while True:
@@ -21,71 +27,6 @@ def receive():
         response = client.recv(1024)
         print(response.decode('utf-8'))
 
-'''
-# This is for camera
-a = ''
-def sndvideo():                                                                         #傳
-
-    global a
-    cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,450)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT,450)
-
-    resolution = 0                                                                      #解析度變數
-    dev = 0
-    estimate = 0.1                                                                      #設定的標準傳送秒數
-    add = 0                                                                             #隨網路速度做視訊大小增減的變數(連續3包)
-    sub = 0
-    count = 0
-
-    while cap.isOpened():
-        ret, frame = cap.read()
-        
-        cv2.putText(frame, a, (100,250), cv2.FONT_HERSHEY_SIMPLEX,1,(0,71,171),2, cv2.LINE_AA)             
-        cv2.imwrite('buffer.jpg',frame,[cv2.IMWRITE_JPEG_QUALITY, 25])
-
-        if count > 30:
-            count = 0
-            a=''
-
-        else:
-            count+=1
-        
-        try:
-                    
-            start = time.time()
-            with open('buffer.jpg','rb') as f:
-                client.sendall(f.read())
-            
-            ack = client.recv(128)
-            sample = time.time()- start
-
-            #estimate = (1-0.125)*estimate + 0.125*sample
-            #dev = (1-0.25)*dev + 0.25*abs(sample - estimate)
-            timeout = estimate +4*dev
-
-            # if sample < timeout - 0.07:                                                 #隨著偵測網路速度做視訊大小調整
-            #     add +=1
-            #     if(add >=5):
-            #         resolution += 10
-            #         cap.set(cv2.CAP_PROP_FRAME_WIDTH,400+resolution)
-            #         cap.set(cv2.CAP_PROP_FRAME_HEIGHT,400+resolution)
-
-            # elif sample > timeout + 0.07:                                               #隨著網路速度做視訊大小調整
-            #     sub += 1
-            #     if(sub >=5):
-            #         resolution -= 10
-            #         cap.set(cv2.CAP_PROP_FRAME_WIDTH,400+resolution)
-            #         cap.set(cv2.CAP_PROP_FRAME_HEIGHT,400+resolution)
-
-            # else:
-            #     add =0
-            #     sub =0
-                                       
-                    
-        except:
-            pass
-'''
 
 def recvideo():
 
@@ -145,7 +86,7 @@ def recvideo():
             pass
                     
         client.sendall(str.encode('ack'))
-
+'''
 
 # This is for screen
 def video():
@@ -160,6 +101,15 @@ def video():
         while(True):
             screen = ImageGrab.grab(bbox=(480, 300, 1440, 900))#.resize((960, 600))
             screen = cv2.cvtColor(np.array(screen), cv2.COLOR_BGR2RGB)
+
+            try:
+                f = open('message.txt')
+                message = f.read()
+                f.close()
+            except:
+                message = ""
+            
+            cv2.putText(screen, message, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (34,195,46), 2, cv2.LINE_AA)
             cv2.imwrite('screen.jpg', screen, [cv2.IMWRITE_JPEG_QUALITY, resolution])
                     
             try:
@@ -179,13 +129,41 @@ def video():
                 pass
         
     sndscreen()
-    
+
+
+def type():
+    temp = ''
+
+    pygame.init()
+    screen = pygame.display.set_mode((480, 360))
+    font = pygame.font.Font(None, 50)
+
+    while True:
+        for evt in pygame.event.get():
+            if evt.type == KEYDOWN:
+                if evt.unicode.isalpha():
+                    temp += evt.unicode
+                elif evt.key == K_BACKSPACE:
+                    temp = temp[:-1]
+                elif evt.key == K_RETURN:
+                    f = open('message.txt', 'w+')
+                    f.write(temp)
+                    f.close()
+                    temp = ''
+            elif evt.type == QUIT:
+                return
+        screen.fill((0, 0, 0))
+        block = font.render(temp, True, (255, 255, 255))
+        rect = block.get_rect()
+        rect.center = screen.get_rect().center
+        screen.blit(block, rect)
+        pygame.display.flip()
 
 
 if __name__ == '__main__':
-    # HOST, PORT = "127.0.0.1", 61677
+    HOST, PORT = "127.0.0.1", 61677
     # HOST, PORT = "140.112.226.236", 61677
-    HOST, PORT = "163.13.137.71", 61677
+    # HOST, PORT = "163.13.137.71", 61677
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     s.bind((HOST, PORT))
     print('waiting...')
@@ -201,8 +179,14 @@ if __name__ == '__main__':
 
     # 2 screen
     # press "q" to close the screen
-    video()
+    # video()
 
+    if os.path.exists('message.txt'):
+        os.remove('message.txt')
+    
+    Process(target = type).start()
+    Process(target = video).start()
+    
     # 3 text (on terminal)
     # Thread(target = send).start()
     # Thread(target = receive).start()
