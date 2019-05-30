@@ -5,8 +5,8 @@ from threading import Thread
 # import pickle
 
 import numpy as np
-# from PIL import ImageGrab     # This does not support linux
-import pyscreenshot as ImageGrab
+from PIL import ImageGrab     # This does not support linux
+# import pyscreenshot as ImageGrab
 
 from multiprocessing import Process
 import pygame
@@ -98,7 +98,8 @@ def video():
         #count = 0
 
         while(True):
-            screen = ImageGrab.grab(bbox=(480, 300, 1440, 900))
+            # screen = ImageGrab.grab(bbox=(480, 300, 1440, 900))
+            screen = ImageGrab.grab(bbox=(640, 400, 1920, 1200)).resize((640, 400))
             screen = cv2.cvtColor(np.array(screen), cv2.COLOR_BGR2RGB)
 
             try:
@@ -108,7 +109,7 @@ def video():
             except:
                 message = ""
             
-            cv2.putText(screen, message, (10, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (255,153,51), 2, cv2.LINE_AA)
+            cv2.putText(screen, message, (10, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (255,153,51), 2, cv2.LINE_AA)
             cv2.imwrite('screen.jpg', screen, [cv2.IMWRITE_JPEG_QUALITY, resolution])
                     
             try:
@@ -134,8 +135,8 @@ def type():
     temp = ''
 
     pygame.init()
-    screen = pygame.display.set_mode((480, 360))
-    font = pygame.font.Font(None, 50)
+    screen = pygame.display.set_mode((480, 120))
+    font = pygame.font.Font(None, 30)
 
     while True:
         for evt in pygame.event.get():
@@ -153,8 +154,8 @@ def type():
                     temp += evt.unicode
             elif evt.type == QUIT:
                 return
-        screen.fill((0, 0, 0))
-        block = font.render(temp, True, (255, 255, 255))
+        screen.fill((255, 255, 255))
+        block = font.render(temp, True, (0, 0, 0))
         rect = block.get_rect()
         rect.center = screen.get_rect().center
         screen.blit(block, rect)
@@ -162,7 +163,8 @@ def type():
 
 
 if __name__ == '__main__':
-    HOST, PORT = "127.0.0.1", 61677
+    # HOST, PORT = "127.0.0.1", 61677
+    HOST, PORT = "140.112.77.65", 61677
     # HOST, PORT = "140.112.226.236", 61677
     # HOST, PORT = "163.13.137.71", 61677
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
