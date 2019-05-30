@@ -1,14 +1,9 @@
 import socket
 import cv2
 import time
-from threading import Thread
-
-import pickle
 import speech_recognition
 import numpy as np
-from PIL import ImageGrab     # This does not support linux
-# import pyscreenshot as ImageGrab
-
+from PIL import Image, ImageGrab, ImageFont, ImageDraw
 from multiprocessing import Process
 import pygame
 from pygame.locals import *
@@ -88,8 +83,11 @@ def recvideo():
         client.sendall(str.encode('ack'))
 '''
 
+
 # This is for screen
 def video():
+    font = ImageFont.truetype('SimSun-Bold.ttf', 28)
+
     def sndscreen():
         resolution = 20
         #estimate = 0.1
@@ -99,25 +97,32 @@ def video():
         #count = 0
 
         while(True):
-            # screen = ImageGrab.grab(bbox=(480, 300, 1440, 900))
-            screen = ImageGrab.grab(bbox=(640, 400, 1920, 1200)).resize((640, 400))
-            screen = cv2.cvtColor(np.array(screen), cv2.COLOR_BGR2RGB)
-
             try:
                 f = open('message.txt')
                 message = f.read()
                 f.close()
-                f = open('speech.txt')
-                speech = f.read().decode('utf-8')
-                f.close()
             except:
                 message = ""
+
+            try:
+                f = open('speech.txt')
+                speech = f.read()
+                f.close()
+            except:
                 speech = ""
+
+            # screen = ImageGrab.grab(bbox=(480, 300, 1440, 900))
+            screen = ImageGrab.grab(bbox=(640, 400, 1920, 1200)).resize((640, 400))
             
-            cv2.putText(screen, message, (10, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (255,153,51), 2, cv2.LINE_AA)
-            cv2.putText(screen, speech, (10, 350), cv2.FONT_HERSHEY_COMPLEX, 1, (255,153,51), 2, cv2.LINE_AA) #51, 153, 255
+            draw = ImageDraw.Draw(screen)
+            draw.text((10, 350), speech, font = font, fill = (51, 153, 255, 1))
+
+            screen = cv2.cvtColor(np.array(screen), cv2.COLOR_BGR2RGB)
+            
+            cv2.putText(screen, message, (10, 40), cv2.FONT_HERSHEY_COMPLEX, 0.75, (255,153,51), 2, cv2.LINE_AA)
+            # cv2.putText(screen, speech, (10, 350), font, 0.75, (255,153,51), 2, cv2.LINE_AA) #51, 153, 255
             cv2.imwrite('screen.jpg', screen, [cv2.IMWRITE_JPEG_QUALITY, resolution])
-                    
+            
             try:
                 start = time.time()
                 with open('screen.jpg','rb') as f:
@@ -126,14 +131,14 @@ def video():
                 #ack = client.recv(128)
                 sample = time.time()- start
 
-                if sample > 6e-5:
+                if sample > 1e-3:
                     resolution = 10
                 else:
                     resolution = 20
-
+                
             except:
                 pass
-        
+    
     sndscreen()
 
 
@@ -160,6 +165,7 @@ def type():
                     temp += evt.unicode
             elif evt.type == QUIT:
                 return
+
         screen.fill((255, 255, 255))
         block = font.render(temp, True, (0, 0, 0))
         rect = block.get_rect()
@@ -167,12 +173,13 @@ def type():
         screen.blit(block, rect)
         pygame.display.flip()
 
+
 def recognition():
     r = speech_recognition.Recognizer()
     with speech_recognition.Microphone() as source:        
         while 1:
             r.adjust_for_ambient_noise(source) 
-            print("Say something!")
+            # print("Say something!")
             audio=r.listen(source)
             try:
                 global a
@@ -182,11 +189,13 @@ def recognition():
                 f.close()
                 print(a)
             except speech_recognition.UnknownValueError:
-                print("oops")
+                # print("oops")
+                pass
+
 
 if __name__ == '__main__':
-    # HOST, PORT = "127.0.0.1", 61677
-    HOST, PORT = "140.112.77.65", 61677
+    HOST, PORT = "127.0.0.1", 61677
+    # HOST, PORT = "140.112.73.208", 61677
     # HOST, PORT = "140.112.226.236", 61677
     # HOST, PORT = "163.13.137.71", 61677
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)

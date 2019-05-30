@@ -1,24 +1,13 @@
-# import speech_recognition
 import cv2
-from threading import Thread
-from threading import Lock
 import socket
-# import tkinter
 import time
-# import pickle
 from PIL import Image
-# from functools import partial
 import numpy as np
-# from tkinter import *
-# import tkinter.messagebox
 from random import randint
-
 from multiprocessing import Process
-import pygame
-from pygame.locals import *
 
 
-DANMU=list()
+# DANMU=list()
 MAX_BUFFER_SIZE = 1000000000
 
 '''
@@ -141,8 +130,8 @@ def video():
 
 
 if __name__ == "__main__" :
-    # HOST, PORT = "127.0.0.1", 61677
-    HOST, PORT = "140.112.77.65", 61677
+    HOST, PORT = "127.0.0.1", 61677
+    # HOST, PORT = "140.112.73.208", 61677
     # HOST, PORT = "140.112.226.236", 61677
     # HOST, PORT = "163.13.137.71", 61677
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
