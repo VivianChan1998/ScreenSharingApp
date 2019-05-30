@@ -5,9 +5,9 @@ from threading import Lock
 import socket
 # import tkinter
 import time
-import pickle
+# import pickle
 from PIL import Image
-from functools import partial
+# from functools import partial
 import numpy as np
 # from tkinter import *
 # import tkinter.messagebox
@@ -103,22 +103,15 @@ def sndvideo():                                                                 
 
 # This is for screen
 def video():
-    def recscreen():  
+
+    def recscreen():
         
-        global lock
-        kernel = np.array([[0,-1,0], [-1,5,-1], [0,-1,0]])
-        i=0
-        minute=0
-        sec=0
-        clock = time.time()                                                         #計時
-        sliding = 0                                                                 #彈幕滑動
-        
-        while 1:                                                                    #讀取對方的視訊
+        while 1:
             data = s.recv(MAX_BUFFER_SIZE)     
-            for i in range(6):
+            for i in range(10):
                 data += s.recv(MAX_BUFFER_SIZE)
                 
-            try:                                                                    #將接收的RGB陣列寫到jpg檔中再打開
+            try:
                     
                 with open('save.jpg','wb') as f:
                     f.write(data)
@@ -127,7 +120,6 @@ def video():
                         
                     global frame
                     frame = cv2.imread('save.jpg')
-                    
                     cv2.imshow('Server', frame)
                     
                     if cv2.waitKey(100) == ord('q'):
