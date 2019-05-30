@@ -2,14 +2,13 @@ import socket
 import cv2
 import time
 from threading import Thread
-import pickle
+# import pickle
 
 import numpy as np
 # from PIL import ImageGrab     # This does not support linux
 import pyscreenshot as ImageGrab
 
-from multiprocessing import Process, Manager, Value
-from ctypes import c_char_p
+from multiprocessing import Process
 import pygame
 from pygame.locals import *
 import os
@@ -99,7 +98,7 @@ def video():
         #count = 0
 
         while(True):
-            screen = ImageGrab.grab(bbox=(480, 300, 1440, 900))#.resize((960, 600))
+            screen = ImageGrab.grab(bbox=(480, 300, 1440, 900))
             screen = cv2.cvtColor(np.array(screen), cv2.COLOR_BGR2RGB)
 
             try:
@@ -109,7 +108,7 @@ def video():
             except:
                 message = ""
             
-            cv2.putText(screen, message, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (34,195,46), 2, cv2.LINE_AA)
+            cv2.putText(screen, message, (10, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (255,153,51), 2, cv2.LINE_AA)
             cv2.imwrite('screen.jpg', screen, [cv2.IMWRITE_JPEG_QUALITY, resolution])
                     
             try:
@@ -141,8 +140,8 @@ def type():
     while True:
         for evt in pygame.event.get():
             if evt.type == KEYDOWN:
-                if evt.unicode.isalpha():
-                    temp += evt.unicode
+                if evt.key == K_SPACE:
+                    temp += ' '
                 elif evt.key == K_BACKSPACE:
                     temp = temp[:-1]
                 elif evt.key == K_RETURN:
@@ -150,6 +149,8 @@ def type():
                     f.write(temp)
                     f.close()
                     temp = ''
+                else:
+                    temp += evt.unicode
             elif evt.type == QUIT:
                 return
         screen.fill((0, 0, 0))
