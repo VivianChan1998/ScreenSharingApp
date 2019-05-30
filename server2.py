@@ -1,41 +1,29 @@
-# import speech_recognition
-import cv2
-from threading import Thread
-from threading import Lock
 import socket
-# import tkinter
+import cv2
 import time
-# import pickle
-from PIL import Image
-# from functools import partial
+from threading import Thread
+import pickle
+import wx
 import numpy as np
-# from tkinter import *
-# import tkinter.messagebox
-from random import randint
-
-from multiprocessing import Process
-import pygame
-from pygame.locals import *
+# from PIL import ImageGrab     # This does not support linux
+import pyscreenshot as ImageGrab
+import mss
 
 
-DANMU=list()
-MAX_BUFFER_SIZE = 1000000000
-
-'''
 # for sending text on terminal
 def send():
     while True:
         content = input()
-        s.send(content.encode('utf-8'))
-
+        client.send(content.encode('utf-8'))
 
 # for receiving text on terminal
 def receive():
     while True:
-        response = s.recv(1024)
+        response = client.recv(1024)
         print(response.decode('utf-8'))
 
 
+# This is for camera
 a = ''
 def sndvideo():                                                                         #傳
 
@@ -68,9 +56,9 @@ def sndvideo():                                                                 
                     
             start = time.time()
             with open('buffer.jpg','rb') as f:
-                s.sendall(f.read())
+                client.sendall(f.read())
             
-            ack = s.recv(128)
+            ack = client.recv(128)
             sample = time.time()- start
 
             #estimate = (1-0.125)*estimate + 0.125*sample
@@ -98,71 +86,70 @@ def sndvideo():                                                                 
                     
         except:
             pass
-'''
 
 
 # This is for screen
 def video():
+    def sndscreen():
+        # app = wx.App()
+        # screen = wx.ScreenDC()
+        # size = screen.GetSize()
+        while(True):
+            #time.sleep(0.01)
+            
+            # bmp = wx.Bitmap(size[0], size[1])
+            # mem = wx.MemoryDC(bmp)
+            # mem.Blit(0, 0, size[0], size[1], screen, 0, 0)
+            # del mem
+            # bmp.SaveFile('screen.jpeg', wx.BITMAP_TYPE_JPEG)
 
-    def recscreen():
-        
-        while 1:
-            data = s.recv(MAX_BUFFER_SIZE)     
-            for i in range(10):
-                data += s.recv(MAX_BUFFER_SIZE)
-                
+            '''
+            #舊方法
+            screen = ImageGrab.grab(bbox=(0, 0, 1920, 1200)).resize((1280,800))
+            screen = np.array(ImageGrab.grab(bbox=(0, 0, 1920, 1200)).resize((1280,800)))
+            screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
+            cv2.imwrite('screen.jpg', screen, [cv2.IMWRITE_JPEG_QUALITY, 2])
+            '''     
             try:
-                    
-                with open('save.jpg','wb') as f:
-                    f.write(data)
+                with mss.mss() as sct:
+                    # Part of the screen to capture
+                    monitor = {'top': 40, 'left': 0, 'width': 160, 'height': 160}
 
-                try:
-                        
-                    global frame
-                    frame = cv2.imread('save.jpg')
-                    cv2.imshow('Server', frame)
-                    
-                    if cv2.waitKey(100) == ord('q'):
-                        cv2.destroyAllWindows()
-                        break
-                            
-                except:
-                    pass
-                    #data = s.recv(1000000)
-                    #print(":(")
-                    
+                    while 'Screen capturing':            
+                        # Get raw pixels from the screen, save it to a Numpy array
+                        img = np.array(sct.grab(monitor))
+                        img = cv2.imencode('.jpg', img)[1].tostring()
+                        client.sendall(img)
+                #ack = client.recv(128) #先取消ack 為了用兩次recv去防止「傳一次沒有傳到完整圖片但是被ack卡住了」這件事
+                #可以再看看能不能加回來，雖然沒有應該不會怎樣吧（？
+                
             except:
-                print('except')
                 pass
-                    
-            # s.sendall(str.encode('ack'))   
+        
+    sndscreen()
+    
 
-    recscreen()
 
-
-if __name__ == "__main__" :
-    # HOST, PORT = "127.0.0.1", 61677
-    HOST, PORT = "140.112.77.65", 61677
+if __name__ == '__main__':
+    HOST, PORT = "", 61677
     # HOST, PORT = "140.112.226.236", 61677
     # HOST, PORT = "163.13.137.71", 61677
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((HOST, PORT))
+    s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    s.bind((HOST, PORT))
+    print('waiting...')
+    s.listen(1)
 
-    print('connected to %s' % HOST)
+    client, address = s.accept()
+    print('%s connected' % str(address))
 
     # 1 camera
-    # press "q" to close the screen
-    # recvideo()
     # sndvideo()
 
     # 2 screen
     # press "q" to close the screen
-    # video()
-    Process(target = video).start()
+    video()
 
     # 3 text (on terminal)
     # Thread(target = send).start()
     # Thread(target = receive).start()
-    # Process(target = send).start()
-    # Process(target = receive).start()
 

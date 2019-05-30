@@ -2,8 +2,9 @@ import socket
 import cv2
 import time
 from threading import Thread
-# import pickle
 
+import pickle
+import speech_recognition
 import numpy as np
 from PIL import ImageGrab     # This does not support linux
 # import pyscreenshot as ImageGrab
@@ -106,10 +107,15 @@ def video():
                 f = open('message.txt')
                 message = f.read()
                 f.close()
+                f = open('speech.txt')
+                speech = f.read().decode('utf-8')
+                f.close()
             except:
                 message = ""
+                speech = ""
             
             cv2.putText(screen, message, (10, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (255,153,51), 2, cv2.LINE_AA)
+            cv2.putText(screen, speech, (10, 350), cv2.FONT_HERSHEY_COMPLEX, 1, (255,153,51), 2, cv2.LINE_AA) #51, 153, 255
             cv2.imwrite('screen.jpg', screen, [cv2.IMWRITE_JPEG_QUALITY, resolution])
                     
             try:
@@ -161,6 +167,22 @@ def type():
         screen.blit(block, rect)
         pygame.display.flip()
 
+def recognition():
+    r = speech_recognition.Recognizer()
+    with speech_recognition.Microphone() as source:        
+        while 1:
+            r.adjust_for_ambient_noise(source) 
+            print("Say something!")
+            audio=r.listen(source)
+            try:
+                global a
+                a = r.recognize_google(audio, language='zh-TW') #zh-CN
+                f = open('speech.txt', 'w+')
+                f.write(a)
+                f.close()
+                print(a)
+            except speech_recognition.UnknownValueError:
+                print("oops")
 
 if __name__ == '__main__':
     # HOST, PORT = "127.0.0.1", 61677
@@ -186,8 +208,12 @@ if __name__ == '__main__':
 
     if os.path.exists('message.txt'):
         os.remove('message.txt')
+
+    if os.path.exists('speech.txt'):
+        os.remove('speech.txt')
     
     Process(target = type).start()
+    Process(target = recognition).start()
     Process(target = video).start()
     
     # 3 text (on terminal)
