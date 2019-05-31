@@ -89,7 +89,7 @@ def video():
     font = ImageFont.truetype('SimSun-Bold.ttf', 28)
 
     def sndscreen():
-        resolution = 20
+        resolution = 10
         #estimate = 0.1
         #dev = 0
         #add = 0
@@ -129,12 +129,12 @@ def video():
                     client.sendall(f.read())
             
                 #ack = client.recv(128)
-                sample = time.time()- start
+                # sample = time.time()- start
 
-                if sample > 1e-3:
-                    resolution = 10
-                else:
-                    resolution = 20
+                # if sample > 1e-3:
+                #     resolution = 10
+                # else:
+                #     resolution = 20
                 
             except:
                 pass
@@ -176,12 +176,15 @@ def type():
 
 def recognition():
     r = speech_recognition.Recognizer()
-    with speech_recognition.Microphone() as source:        
+    with speech_recognition.Microphone() as source:
+        print('\n')
         while 1:
             r.adjust_for_ambient_noise(source) 
-            # print("Say something!")
+            print("\n------------------------------")
+            print("🦎Say something")
             audio=r.listen(source)
             try:
+                print("🦈Processing")
                 global a
                 a = r.recognize_google(audio, language='zh-TW') #zh-CN
                 f = open('speech.txt', 'w+')
@@ -189,13 +192,14 @@ def recognition():
                 f.close()
                 print(a)
             except speech_recognition.UnknownValueError:
+                print("🐤Please say it again")
                 # print("oops")
                 pass
 
 
 if __name__ == '__main__':
-    HOST, PORT = "127.0.0.1", 61677
-    # HOST, PORT = "140.112.73.208", 61677
+    # HOST, PORT = "127.0.0.1", 61677
+    HOST, PORT = "140.112.73.132", 61677
     # HOST, PORT = "140.112.226.236", 61677
     # HOST, PORT = "163.13.137.71", 61677
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -224,6 +228,8 @@ if __name__ == '__main__':
     Process(target = type).start()
     Process(target = recognition).start()
     Process(target = video).start()
+
+    # video()
     
     # 3 text (on terminal)
     # Thread(target = send).start()
