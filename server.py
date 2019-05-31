@@ -89,7 +89,7 @@ def video():
     font = ImageFont.truetype('SimSun-Bold.ttf', 28)
 
     def sndscreen():
-        resolution = 10
+        resolution = 20
         #estimate = 0.1
         #dev = 0
         #add = 0
@@ -97,6 +97,7 @@ def video():
         #count = 0
 
         while(True):
+            
             try:
                 f = open('message.txt')
                 message = f.read()
@@ -110,8 +111,8 @@ def video():
                 f.close()
             except:
                 speech = ""
+            
 
-            # screen = ImageGrab.grab(bbox=(480, 300, 1440, 900))
             screen = ImageGrab.grab(bbox=(640, 400, 1920, 1200)).resize((640, 400))
             
             draw = ImageDraw.Draw(screen)
@@ -120,21 +121,19 @@ def video():
             screen = cv2.cvtColor(np.array(screen), cv2.COLOR_BGR2RGB)
             
             cv2.putText(screen, message, (10, 40), cv2.FONT_HERSHEY_COMPLEX, 0.75, (255,153,51), 2, cv2.LINE_AA)
-            # cv2.putText(screen, speech, (10, 350), font, 0.75, (255,153,51), 2, cv2.LINE_AA) #51, 153, 255
             cv2.imwrite('screen.jpg', screen, [cv2.IMWRITE_JPEG_QUALITY, resolution])
             
             try:
                 start = time.time()
                 with open('screen.jpg','rb') as f:
                     client.sendall(f.read())
-            
-                #ack = client.recv(128)
-                # sample = time.time()- start
 
-                # if sample > 1e-3:
-                #     resolution = 10
-                # else:
-                #     resolution = 20
+                sample = time.time()- start
+
+                if sample > 1e-3:
+                    resolution = 10
+                else:
+                    resolution = 20
                 
             except:
                 pass
@@ -198,8 +197,8 @@ def recognition():
 
 
 if __name__ == '__main__':
-    # HOST, PORT = "127.0.0.1", 61677
-    HOST, PORT = "140.112.73.132", 61677
+    HOST, PORT = "127.0.0.1", 61677
+    # HOST, PORT = "140.112.73.132", 61677
     # HOST, PORT = "140.112.226.236", 61677
     # HOST, PORT = "163.13.137.71", 61677
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -229,8 +228,6 @@ if __name__ == '__main__':
     Process(target = recognition).start()
     Process(target = video).start()
 
-    # video()
-    
     # 3 text (on terminal)
     # Thread(target = send).start()
     # Thread(target = receive).start()
