@@ -9,102 +9,23 @@ import pygame
 from pygame.locals import *
 import os
 
-'''
-# for sending text on terminal
-def send():
-    while True:
-        content = input()
-        client.send(content.encode('utf-8'))
 
-# for receiving text on terminal
-def receive():
-    while True:
-        response = client.recv(1024)
-        print(response.decode('utf-8'))
-
-
-def recvideo():
-
-    global lock
-    kernel = np.array([[0,-1,0], [-1,5,-1], [0,-1,0]])
-    i=0
-    minute=0
-    sec=0
-    clock = time.time()                                                         #計時
-    sliding = 0                                                                 #彈幕滑動
-
-    while 1:                                                                    #讀取對方的視訊
-                     
-        data = client.recv(3000000)
-                
-        try:                                                                    #將接收的RGB陣列寫到jpg檔中再打開
-                    
-            with open('save.jpg','wb') as f:
-                f.write(data)
-
-            try:
-                        
-                global frame
-                frame = cv2.imread('save.jpg')
-
-                #frame = cv2.medianBlur(frame, 5)  
-                #frame = cv2.filter2D(frame, -1, kernel)
-                
-                counter = int (time.time()-clock)
-                minute = int (counter/60)
-                sec = int (counter%60)
-
-                for e in DANMU:
-        
-                    e[1] += 10
-                    cv2.putText(frame, e[0], (550-e[1],e[2]), cv2.FONT_HERSHEY_SIMPLEX,2,(34,195,46),1, cv2.LINE_AA)
-
-                    if e[1] == 550:
-                        DANMU.pop(0)
-
-                cv2.putText(frame, str(minute) + ':' + str(sec), (0,86), cv2.FONT_HERSHEY_SIMPLEX,2,(34,195,46),1, cv2.LINE_AA)
-                cv2.putText(frame, str(i), (0,40), cv2.FONT_HERSHEY_SIMPLEX,2,(34,195,46),1, cv2.LINE_AA)
-                
-                cv2.imshow('Server', frame)                                          #顯示畫面
-
-                i+=1
-                
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-                            
-            except:
-                             
-                data = client.recv(6000000)                              #傳送中出現錯誤,清空buffer
-                print(":(")
-                        
-        except:
-            pass
-                    
-        client.sendall(str.encode('ack'))
-'''
-
-
-# This is for screen
 def video():
     font = ImageFont.truetype('SimSun-Bold.ttf', 28)
 
+    # 傳送螢幕畫面
     def sndscreen():
-        resolution = 20
-        #estimate = 0.1
-        #dev = 0
-        #add = 0
-        #sub = 0
-        #count = 0
+        resolution = 20     # 影像畫質
 
         while(True):
-            
+            # 開啟要顯示的鍵盤輸入訊息
             try:
                 f = open('message.txt')
                 message = f.read()
                 f.close()
             except:
                 message = ""
-
+            # 開啟要顯示的語音輸入訊息
             try:
                 f = open('speech.txt')
                 speech = f.read()
@@ -112,24 +33,26 @@ def video():
             except:
                 speech = ""
             
-
+            # 螢幕截圖
             screen = ImageGrab.grab(bbox=(640, 400, 1920, 1200)).resize((640, 400))
-            
+            # 在圖片上加入語音輸入的訊息（speech）
             draw = ImageDraw.Draw(screen)
             draw.text((10, 350), speech, font = font, fill = (51, 153, 255, 1))
 
             screen = cv2.cvtColor(np.array(screen), cv2.COLOR_BGR2RGB)
-            
+            # 在圖片上加入鍵盤輸入的訊息（message）
             cv2.putText(screen, message, (10, 40), cv2.FONT_HERSHEY_COMPLEX, 0.75, (255,153,51), 2, cv2.LINE_AA)
+            # 將圖片儲存為'screen.jpg'
             cv2.imwrite('screen.jpg', screen, [cv2.IMWRITE_JPEG_QUALITY, resolution])
             
             try:
                 start = time.time()
+                # 將'screen.jpg'傳送給client
                 with open('screen.jpg','rb') as f:
                     client.sendall(f.read())
 
+                # 若圖片傳送時間超過1e-3秒，降低圖片畫質
                 sample = time.time()- start
-
                 if sample > 1e-3:
                     resolution = 10
                 else:
@@ -141,14 +64,16 @@ def video():
     sndscreen()
 
 
+# 鍵盤輸入訊息
 def type():
     temp = ''
-
+    # 開新的視窗
     pygame.init()
     screen = pygame.display.set_mode((480, 120))
     font = pygame.font.Font(None, 30)
 
     while True:
+        # 讀取鍵盤輸入，將結果寫入'message.txt'
         for evt in pygame.event.get():
             if evt.type == KEYDOWN:
                 if evt.key == K_SPACE:
@@ -165,6 +90,7 @@ def type():
             elif evt.type == QUIT:
                 return
 
+        # 將輸入的訊息顯示在視窗中
         screen.fill((255, 255, 255))
         block = font.render(temp, True, (0, 0, 0))
         rect = block.get_rect()
@@ -173,16 +99,19 @@ def type():
         pygame.display.flip()
 
 
+# 語音輸入訊息
 def recognition():
     r = speech_recognition.Recognizer()
     with speech_recognition.Microphone() as source:
         print('\n')
         while 1:
+            # 讀取麥克風輸入
             r.adjust_for_ambient_noise(source) 
             print("\n------------------------------")
             print("🦎Say something")
             audio=r.listen(source)
             try:
+                # 執行語音辨識，將結果寫入'speech.txt'
                 print("🦈Processing")
                 global a
                 a = r.recognize_google(audio, language='zh-TW') #zh-CN
@@ -191,16 +120,16 @@ def recognition():
                 f.close()
                 print(a)
             except speech_recognition.UnknownValueError:
+                # 無法辨識
                 print("🐤Please say it again")
-                # print("oops")
                 pass
 
 
 if __name__ == '__main__':
     HOST, PORT = "127.0.0.1", 61677
-    # HOST, PORT = "140.112.73.132", 61677
     # HOST, PORT = "140.112.226.236", 61677
-    # HOST, PORT = "163.13.137.71", 61677
+    
+    # 建立和client互連的socket
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     s.bind((HOST, PORT))
     print('waiting...')
@@ -209,26 +138,14 @@ if __name__ == '__main__':
     client, address = s.accept()
     print('%s connected' % str(address))
 
-    # 1 camera
-    # press "q" to close the screen
-    # sndvideo()
-    # recvideo()
-
-    # 2 screen
-    # press "q" to close the screen
-    # video()
-
     if os.path.exists('message.txt'):
         os.remove('message.txt')
 
     if os.path.exists('speech.txt'):
         os.remove('speech.txt')
     
+    # 開始多個Process
     Process(target = type).start()
     Process(target = recognition).start()
     Process(target = video).start()
-
-    # 3 text (on terminal)
-    # Thread(target = send).start()
-    # Thread(target = receive).start()
 
