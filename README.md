@@ -32,8 +32,7 @@ Client端：`python3 client.py $OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`
   <img width="500" src="https://i.imgur.com/xFatrL2.jpg">
 </p>
 
-右邊的白色視窗顯示的是語音辨識的結果。
-下方的白色視窗顯示的是server鍵盤輸入的訊息。
+右邊的白色視窗顯示的是語音辨識的結果，下方的白色視窗顯示的是server鍵盤輸入的訊息。
 
 ### Client端
 <p>
