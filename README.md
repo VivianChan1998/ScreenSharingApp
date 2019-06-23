@@ -5,10 +5,8 @@
 ----
 Server可以傳送螢幕畫面給client，同時server也能用鍵盤或語音輸入文字訊息，和螢幕畫面一起傳送到client端。
 
-
 如何使用
 ----
-
 ```
 $git clone https://github.com/VivianChan1998/ScreenSharingApp.git
 $pip install -r requirements.txt
@@ -26,11 +24,11 @@ Client端：`python3 client.py $OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`
 ----
 
 ### Server端
-<p align="center">
+<p>
   <img width="500" src="https://i.imgur.com/SNhNrOF.jpg">
 </p>
 
-<p align="center">
+<p>
   <img width="500" src="https://i.imgur.com/xFatrL2.jpg">
 </p>
 
@@ -38,11 +36,11 @@ Client端：`python3 client.py $OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`
 下方的白色視窗顯示的是server鍵盤輸入的訊息。
 
 ### Client端
-<p align="center">
+<p>
   <img width="500" src="https://i.imgur.com/3gxdqNI.png">
 </p>
 
-<p align="center">
+<p>
   <img width="500" src="https://i.imgur.com/MiNfb49.png">
 </p>
 
