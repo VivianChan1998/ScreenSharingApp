@@ -11,11 +11,11 @@ Server可以傳送螢幕畫面給client，同時server也能用鍵盤或語音�
 $git clone https://github.com/VivianChan1998/ScreenSharingApp.git
 $pip install -r requirements.txt
 ```
-Server端：`$python3 server.py`
+Server端：`$python3 server.py`<br>
 Client端：`$python3 client.py`
 
-*On Mac OS 10.14:*
-Server端：`python3 server.py $OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`
+*On Mac OS 10.14:*<br>
+Server端：`python3 server.py $OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`<br>
 Client端：`python3 client.py $OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`
 
 由於使用multiprocessing，在Mac OS 10.14以後必須手動輸入 `OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES` 指令將限制multiprocessing的設定關掉才能順利執行。也可以在.bash_profile中 `export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES` 設定。
