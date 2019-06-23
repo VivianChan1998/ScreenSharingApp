@@ -26,20 +26,29 @@ Client端：`python3 client.py $OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`
 ----
 
 ### Server端
-![](https://i.imgur.com/SNhNrOF.jpg)
+<p align="center">
+  <img width="500" src="https://i.imgur.com/SNhNrOF.jpg">
+</p>
 
-![](https://i.imgur.com/xFatrL2.jpg)
+<p align="center">
+  <img width="500" src="https://i.imgur.com/xFatrL2.jpg">
+</p>
 
 右邊的白色視窗顯示的是語音辨識的結果。
 下方的白色視窗顯示的是server鍵盤輸入的訊息。
 
 ### Client端
-![](https://i.imgur.com/3gxdqNI.png)
+<p align="center">
+  <img width="500" src="https://i.imgur.com/3gxdqNI.png">
+</p>
 
-![](https://i.imgur.com/MiNfb49.png)
+<p align="center">
+  <img width="500" src="https://i.imgur.com/MiNfb49.png">
+</p>
 
 畫面顯示的是server端的螢幕畫面，畫面上方的字是server鍵盤輸入的訊息，畫面下方的字則是server語音輸入的訊息。
 
 ### Demo Video
 [Link 1](https://youtu.be/GyS3F7RrNu0)
+<br>
 [Link 2](https://youtu.be/OBhFUQ7zE-A)
